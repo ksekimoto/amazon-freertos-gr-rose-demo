@@ -82,19 +82,21 @@
  *
  * It must be unique per MQTT broker.
  */
-#define echoCLIENT_ID            ( ( const uint8_t * ) "MQTTEcho" )
+#define echoCLIENT_ID          ( ( const uint8_t * ) "MQTTEcho" )
 
 /**
  * @brief The topic that the MQTT client both subscribes and publishes to.
  */
-#define echoTOPIC_NAME           ( ( const uint8_t * ) "freertos/demos/echo" )
+#define echoTOPIC_NAME         ( ( const uint8_t * ) "freertos/demos/echo" )
+
+#define sensorTOPIC_NAME	   (( const uint8_t *) "freertos/demos/sensor")
 
 /**
  * @brief The string appended to messages that are echoed back to the MQTT broker.
  *
  * It is also used to detect if a received message has already been acknowledged.
  */
-#define echoACK_STRING           ( ( const char * ) " ACK" )
+#define echoACK_STRING         ( ( const char * ) " ACK" )
 
 /**
  * @brief The length of the ACK string appended to messages that are echoed back
@@ -106,12 +108,12 @@
  * @brief Dimension of the character array buffers used to hold data (strings in
  * this case) that is published to and received from the MQTT broker (in the cloud).
  */
-#define echoMAX_DATA_LENGTH      20
+#define echoMAX_DATA_LENGTH      50
 
 /**
  * @brief A block time of 0 simply means "don't block".
  */
-#define echoDONT_BLOCK           ( ( TickType_t ) 0 )
+#define echoDONT_BLOCK         ( ( TickType_t ) 0 )
 
 /*-----------------------------------------------------------*/
 
@@ -163,6 +165,25 @@ static MQTTBool_t prvMQTTCallback( void * pvUserData,
  * @return pdPASS if subscribe operation is successful, pdFALSE otherwise.
  */
 static BaseType_t prvSubscribe( void );
+
+/**
+ * @brief Subscribes to topic in specified string.
+ *
+ * @param[in] SubScribeTopic is the string to subscribe to.
+ *
+ * @return pdPASS if subscribe operation is successful, pdFALSE otherwise.
+ */
+static BaseType_t prvSubscribeTopic( const uint8_t * SubScribeTopic );
+
+/**
+ * @brief Publishes the next message to the echoTOPIC_NAME topic.
+ *
+ * This is called every five seconds to publish the next message.
+ *
+ * @param[in] xMessageNumber Appended to the message to make it unique.
+ * @param[in] Topic String topic to publish to.
+ */
+static void prvPublishMessage( const uint8_t * Topic, BaseType_t xMessageNumber );
 
 /*-----------------------------------------------------------*/
 
@@ -277,6 +298,50 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
     /* Remove compiler warnings in case configPRINTF() is not defined. */
     ( void ) xReturned;
 }
+
+/*-----------------------------------------------------------*/
+
+static void prvPublishMessage( const uint8_t * Topic, BaseType_t xMessageNumber )
+{
+    MQTTAgentPublishParams_t xPublishParameters;
+    MQTTAgentReturnCode_t xReturned;
+    char cDataBuffer[ echoMAX_DATA_LENGTH ];
+
+    /* Check this function is not being called before the MQTT client object has
+     * been created. */
+    configASSERT( xMQTTHandle != NULL );
+
+    /* Create the message that will be published, which is of the form "Hello World n"
+     * where n is a monotonically increasing number. Note that snprintf appends
+     * terminating null character to the cDataBuffer. */
+    ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH, "Hello World %d", ( int ) xMessageNumber );
+
+    /* Setup the publish parameters. */
+    memset( &( xPublishParameters ), 0x00, sizeof( xPublishParameters ) );
+    xPublishParameters.pucTopic = Topic;
+    xPublishParameters.pvData = cDataBuffer;
+    xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) Topic );
+    xPublishParameters.ulDataLength = ( uint32_t ) strlen( cDataBuffer );
+    xPublishParameters.xQoS = eMQTTQoS1;
+
+    /* Publish the message. */
+    xReturned = MQTT_AGENT_Publish( xMQTTHandle,
+                                    &( xPublishParameters ),
+                                    democonfigMQTT_TIMEOUT );
+
+    if( xReturned == eMQTTAgentSuccess )
+    {
+        configPRINTF( ( "Echo successfully published '%s'\r\n", cDataBuffer ) );
+    }
+    else
+    {
+        configPRINTF( ( "ERROR:  Echo failed to publish '%s'\r\n", cDataBuffer ) );
+    }
+
+    /* Remove compiler warnings in case configPRINTF() is not defined. */
+    ( void ) xReturned;
+}
+
 /*-----------------------------------------------------------*/
 
 static void prvMessageEchoingTask( void * pvParameters )
@@ -377,6 +442,39 @@ static BaseType_t prvSubscribe( void )
 }
 /*-----------------------------------------------------------*/
 
+static BaseType_t prvSubscribeTopic( const uint8_t * SubScribeTopic )
+{
+    MQTTAgentReturnCode_t xReturned;
+    BaseType_t xReturn;
+    MQTTAgentSubscribeParams_t xSubscribeParams;
+
+    /* Setup subscribe parameters to subscribe to echoTOPIC_NAME topic. */
+    xSubscribeParams.pucTopic = SubScribeTopic;
+    xSubscribeParams.pvPublishCallbackContext = NULL;
+    xSubscribeParams.pxPublishCallback = prvMQTTCallback;
+    xSubscribeParams.usTopicLength = ( uint16_t ) strlen( ( const char * ) SubScribeTopic );
+    xSubscribeParams.xQoS = eMQTTQoS1;
+
+    /* Subscribe to the topic. */
+    xReturned = MQTT_AGENT_Subscribe( xMQTTHandle,
+                                      &xSubscribeParams,
+                                      democonfigMQTT_TIMEOUT );
+
+    if( xReturned == eMQTTAgentSuccess )
+    {
+        configPRINTF( ( "MQTT Echo demo subscribed to %s\r\n", SubScribeTopic ) );
+        xReturn = pdPASS;
+    }
+    else
+    {
+        configPRINTF( ( "ERROR:  MQTT Echo demo could not subscribe to %s\r\n", SubScribeTopic ) );
+        xReturn = pdFAIL;
+    }
+
+    return xReturn;
+}
+/*-----------------------------------------------------------*/
+
 static MQTTBool_t prvMQTTCallback( void * pvUserData,
                                    const MQTTPublishData_t * const pxPublishParameters )
 {
@@ -395,6 +493,7 @@ static MQTTBool_t prvMQTTCallback( void * pvUserData,
     /* THe ulBytesToCopy has already been initialized to ensure it does not copy
      * more bytes than will fit in the buffer.  Now check it does not copy more
      * bytes than are available. */
+    //configPRINTF( ( "[INFO]: Rcvdsize:%d, Bufsize:%d\r\n", pxPublishParameters->ulDataLength, ulBytesToCopy ) );
     if( pxPublishParameters->ulDataLength <= ulBytesToCopy )
     {
         ulBytesToCopy = pxPublishParameters->ulDataLength;
@@ -475,7 +574,10 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
         configPRINTF( ( "MQTT echo test echoing task created.\r\n" ) );
 
         /* Subscribe to the echo topic. */
-        xReturned = prvSubscribe();
+        //
+        //xReturned = prvSubscribe();
+        xReturned = prvSubscribeTopic(echoTOPIC_NAME);
+        xReturned = prvSubscribeTopic(sensorTOPIC_NAME);
     }
 
     if( xReturned == pdPASS )
@@ -484,7 +586,9 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
          * every five seconds until a minute has elapsed. */
         for( xX = 0; xX < xIterationsInAMinute; xX++ )
         {
-            prvPublishNextMessage( xX );
+            //prvPublishNextMessage( x );
+        	prvPublishMessage(echoTOPIC_NAME, xX );
+        	prvPublishMessage(sensorTOPIC_NAME, xX );
 
             /* Five seconds delay between publishes. */
             vTaskDelay( xFiveSeconds );
