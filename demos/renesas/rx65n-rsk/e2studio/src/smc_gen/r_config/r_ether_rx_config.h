@@ -43,21 +43,36 @@
  0 = MII  (Media Independent Interface)
  1 = RMII (Reduced Media Independent Interface)
  */
+#ifdef RX65N_RSK
     #define ETHER_CFG_MODE_SEL                          (0)
+#else
+    #define ETHER_CFG_MODE_SEL                          (1)
+#endif
 
 /* PHY-LSI address setting for ETHER0/1.
  Please set the value 31 ETHER_CFG_CH0_PHY_ADDRESS when use default setting of the RSK+RX63N.
  Please set the value 30 ETHER_CFG_CH0_PHY_ADDRESS when use default setting of the RSK+RX65N/RSK+RX65N_2MB.
  Please set the value 0 ETHER_CFG_CH0_PHY_ADDRESS and value 1 ETHER_CFG_CH1_PHY_ADDRESS when use default setting of the RSK+RX64M/RSK+RX71M.
  */
+#ifdef RX65N_RSK
     #define ETHER_CFG_CH0_PHY_ADDRESS                   (30)     /* Please define the PHY-LSI address in the range of 0-31. */
+#else
+    #define ETHER_CFG_CH0_PHY_ADDRESS                   (0)     /* Please define the PHY-LSI address in the range of 0-31. */
+#endif
     #define ETHER_CFG_CH1_PHY_ADDRESS                   (1)     /* Please define the PHY-LSI address in the range of 0-31. */
 
 /* The number of Rx descriptors. */
+#ifdef RX65N_RSK
     #define ETHER_CFG_EMAC_RX_DESCRIPTORS               (1)
-
+#else
+    #define ETHER_CFG_EMAC_RX_DESCRIPTORS               (10)
+#endif
 /* The number of Tx descriptors. */
+#ifdef RX65N_RSK
     #define ETHER_CFG_EMAC_TX_DESCRIPTORS               (1)
+#else
+    #define ETHER_CFG_EMAC_TX_DESCRIPTORS               (10)
+#endif
 
 /* Please define the size of the sending and receiving buffer in the value where one frame can surely be stored 
  because the driver is single-frame/single-buffer processing.  */
@@ -96,7 +111,11 @@
  0 = unused  (use PHY-LSI status register)
  1 = use     (use LINKSTA signal)
  */
+#ifdef RX65N_RSK
     #define ETHER_CFG_USE_LINKSTA                       (1)     /* This setting is reflected in all channels */
+#else
+    #define ETHER_CFG_USE_LINKSTA                       (0)     /* This setting is reflected in all channels */
+#endif
 
 /* Definition of whether or not to use KSZ8041NL of the Micrel Inc.
  0 = unused

@@ -621,7 +621,11 @@ Configuration Options
 
 /* This macro is used to select which SCI channel used for debug serial terminal.
  */
+#ifdef RX65N_RSK
 #define MY_BSP_CFG_SERIAL_TERM_SCI                  (8)
+#else
+#define MY_BSP_CFG_SERIAL_TERM_SCI                  (5)     /* GR-ROSE */
+#endif
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

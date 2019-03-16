@@ -35,6 +35,7 @@ Includes
 Global variables and functions
 ***********************************************************************************************************************/
 
+#ifdef RX65N_RSK
 /***********************************************************************************************************************
 * Function Name: R_ETHER_PinSet_ETHERC0_MII
 * Description  : This function initializes pins for r_ether_rx module
@@ -124,3 +125,58 @@ void R_ETHER_PinSet_ETHERC0_MII(void)
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_MPC);
 }
 
+#else
+
+/***********************************************************************************************************************
+* Function Name: R_ETHER_PinSet_ETHERC0_RMII
+* Description  : This function initializes pins for r_ether_rx module
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void R_ETHER_PinSet_ETHERC0_RMII()
+{
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_MPC);
+
+    /* Set REF50CK0 pin */
+    MPC.PB2PFS.BYTE = 0x12U;
+    PORTB.PMR.BIT.B2 = 1U;
+
+    /* Set RMII0_TXD_EN pin */
+    MPC.PB4PFS.BYTE = 0x12U;
+    PORTB.PMR.BIT.B4 = 1U;
+
+    /* Set RMII0_TXD1 pin */
+    MPC.PB6PFS.BYTE = 0x12U;
+    PORTB.PMR.BIT.B6 = 1U;
+
+    /* Set RMII0_TXD0 pin */
+    MPC.PB5PFS.BYTE = 0x12U;
+    PORTB.PMR.BIT.B5 = 1U;
+
+    /* Set RMII0_RXD1 pin */
+    MPC.PB0PFS.BYTE = 0x12U;
+    PORTB.PMR.BIT.B0 = 1U;
+
+    /* Set RMII0_RXD0 pin */
+    MPC.PB1PFS.BYTE = 0x12U;
+    PORTB.PMR.BIT.B1 = 1U;
+
+    /* Set RMII0_RX_ER pin */
+    MPC.PB3PFS.BYTE = 0x12U;
+    PORTB.PMR.BIT.B3 = 1U;
+
+    /* Set RMII0_CRS_DV pin */
+    MPC.PB7PFS.BYTE = 0x12U;
+    PORTB.PMR.BIT.B7 = 1U;
+
+    /* Set ET0_MDC pin */
+    MPC.PA4PFS.BYTE = 0x11U;
+    PORTA.PMR.BIT.B4 = 1U;
+
+    /* Set ET0_MDIO pin */
+    MPC.PA3PFS.BYTE = 0x11U;
+    PORTA.PMR.BIT.B3 = 1U;
+
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_MPC);
+}
+#endif
