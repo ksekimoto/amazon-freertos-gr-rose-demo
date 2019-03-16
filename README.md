@@ -6,6 +6,12 @@ To directly access the **Getting Started Guide** for supported hardware platform
 
 For detailed documentation on Amazon FreeRTOS, refer to the [Amazon FreeRTOS User Guide](https://aws.amazon.com/documentation/freertos).
 
+## GR-ROSE AWS IOT MQTT
+
+<p align="center">
+  <img src="https://github.com/ksekimoto/amazon-freertos-gr-rose-demo/raw/master/GR-ROSE_AWS_IOT_MQTT_led.png" alt="GR-ROSE AWS IOT MQTT"/>
+</p>
+
 ## Supported Hardware
 
 The following MCU boards are supported for Amazon FreeRTOS:
@@ -32,7 +38,9 @@ The following MCU boards are supported for Amazon FreeRTOS:
 8. **MediaTek** - [MediaTek MT7697Hx Development Kit](https://www.mediatek.com/products/smartHome/mt7697h)
     * [Getting Started Guide](https://docs.aws.amazon.com/freertos/latest/userguide/getting_started_mediatek.html)
     * IDE: [Keil uVision](http://www2.keil.com/mdk5/install/)
-9. **Renesas** - [Renesas Starter Kit+ for RX65N-2MB](https://www.renesas.com/us/en/products/software-tools/boards-and-kits/renesas-starter-kits/renesas-starter-kitplus-for-rx65n-2mb.html)
+9. **Renesas** - Changed to GR-ROSE from Renesas Starter Kit+ for RX65N-2MB
+    * GR-ROSE AWS IOT MQTT
+    * [Renesas Starter Kit+ for RX65N-2MB](https://www.renesas.com/us/en/products/software-tools/boards-and-kits/renesas-starter-kits/renesas-starter-kitplus-for-rx65n-2mb.html)
     * [Getting Started Guide](https://docs.aws.amazon.com/freertos/latest/userguide/getting_started_renesas.html)
     * IDE: [e2 studio](https://www.renesas.com/us/en/products/software-tools/tools/ide/e2studio.html)
 10. **Cypress CYW54907** - [Cypress CYW954907AEVAL1F Evaluation Kit](https://www.cypress.com/documentation/development-kitsboards/cyw954907aeval1f-evaluation-kit)
@@ -46,3 +54,4 @@ To evaluate Amazon FreeRTOS without using MCU-based hardware, you can use the Wi
 * Requirements: Microsoft Windows 7 or newer, with at least a dual core and a hard-wired Ethernet connection
 * [Getting Started Guide](https://docs.aws.amazon.com/freertos/latest/userguide/getting_started_windows.html)
 * IDE: [Visual Studio Community Edition](https://www.visualstudio.com/downloads/)
+
