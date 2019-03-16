@@ -77,6 +77,13 @@
 #include "aws_demo_config.h"
 #include "aws_hello_world.h"
 
+/* Includes board and MCU related header files. */
+#include "platform.h"
+/* Public interface header file for this package. */
+#include "r_gpio_rx_if.h"
+/* Configuration for this package. */
+#include "r_gpio_rx_config.h"
+
 /**
  * @brief MQTT client ID.
  *
@@ -114,6 +121,11 @@
  * @brief A block time of 0 simply means "don't block".
  */
 #define echoDONT_BLOCK         ( ( TickType_t ) 0 )
+
+#define cmdLED_ON_STRING     ( ( const char *) "\"command\": \"led on\"" )
+#define cmdLED_OFF_STRING    ( ( const char *) "\"command\": \"led off\"" )
+#define cmdLED_TOGGLE_STRING ( ( const char *) "\"command\": \"led toggle\"" )
+#define LED_BIT 0x02    /* LED1 */
 
 /*-----------------------------------------------------------*/
 
@@ -518,6 +530,29 @@ static MQTTBool_t prvMQTTCallback( void * pvUserData,
              * a deadlock. */
             ( void ) xMessageBufferSend( xEchoMessageBuffer, cBuffer, ( size_t ) ulBytesToCopy + ( size_t ) 1, echoDONT_BLOCK );
         }
+#ifdef RX65N_RSK
+#else
+        //configPRINTF( ( "INFO: cBuffer: %s.\r\n", cBuffer ) );
+        //configPRINTF( ( "INFO: cmd: %s.\r\n", cmdLED_ON_STRING ) );
+        R_GPIO_PortDirectionSet(GPIO_PORT_A, GPIO_DIRECTION_OUTPUT, LED_BIT);
+        if (strstr(cBuffer, cmdLED_ON_STRING) != 0)
+        {
+            R_GPIO_PortWrite(GPIO_PORT_A, R_GPIO_PortRead(GPIO_PORT_A) | LED_BIT);
+        }
+        else if(strstr(cBuffer, cmdLED_OFF_STRING) != 0)
+        {
+            R_GPIO_PortWrite(GPIO_PORT_A, R_GPIO_PortRead(GPIO_PORT_A) & ~LED_BIT);
+        }
+        else if(strstr(cBuffer, cmdLED_TOGGLE_STRING) != 0)
+        {
+            // a message is checked two times, the first is on sending/receiving and the second is on ACK.
+            R_GPIO_PortWrite(GPIO_PORT_A, R_GPIO_PortRead(GPIO_PORT_A) ^ LED_BIT);
+        }
+        else
+        {
+            /* It is not a control message so ignore */
+        }
+#endif
     }
     else
     {
