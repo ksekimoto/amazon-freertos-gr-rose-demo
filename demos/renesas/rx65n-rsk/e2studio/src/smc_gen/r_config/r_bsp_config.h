@@ -272,7 +272,11 @@ Configuration Options
 */
 
 /* Input clock frequency in Hz (XTAL or EXTAL). */
+#ifndef RX65N_RSK
+#define BSP_CFG_XTAL_HZ                 (12000000) // <-- Updated by GUI. Do not edit this value manually
+#else
 #define BSP_CFG_XTAL_HZ                 (24000000) // <-- Updated by GUI. Do not edit this value manually
+#endif
 
 /* The HOCO can operate at several different frequencies. Choose which one using the macro below.
    Available frequency settings:
@@ -297,7 +301,11 @@ Configuration Options
 /* PLL Frequency Multiplication Factor Select (STC). 
    Available multipliers = x10.0 to x30.0 in 0.5 increments (e.g. 10.0, 10.5, 11.0, 11.5, ..., 29.0, 29.5, 30.0)
 */
+#ifndef RX65N_RSK
 #define BSP_CFG_PLL_MUL                 (10.0) // <-- Updated by GUI. Do not edit this value manually
+#else
+#define BSP_CFG_PLL_MUL                 (20.0) // <-- Updated by GUI. Do not edit this value manually
+#endif
 
 /* System Clock Divider (ICK).
    Available divisors = /1 (no division), /2, /4, /8, /16, /32, /64
@@ -624,7 +632,7 @@ Configuration Options
 #ifdef RX65N_RSK
 #define MY_BSP_CFG_SERIAL_TERM_SCI                  (8)
 #else
-#define MY_BSP_CFG_SERIAL_TERM_SCI                  (5)     /* GR-ROSE */
+#define MY_BSP_CFG_SERIAL_TERM_SCI                  (1)     /* GR-ROSE TXD1:P26, RXD1:P30 */
 #endif
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
